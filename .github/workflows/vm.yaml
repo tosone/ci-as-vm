@@ -1,0 +1,26 @@
+name: Ubuntu
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: install frp
+        run: |
+          wget https://github.com/fatedier/frp/releases/download/v0.36.2/frp_0.36.2_linux_amd64.tar.gz
+          tar zxvf frp_0.36.2_linux_amd64.tar.gz
+          sudo install -m 755 frp_0.36.2_linux_amd64/frpc /usr/bin
+          rm -rf frp_0.36.2_linux_amd64*
+          sudo bash <<EOF
+          usermod -U $USER
+          echo "$USER:${{ secrets.PASSWORD }}" | chpasswd
+          EOF
+      - name: reverse shell
+        run: |
+          ls
+          frpc -c frpc.ini
